@@ -50,9 +50,11 @@ module Searchlogic
       link_to options[:as], url_for(url_options), html_options
     end
 
+  end
+  module FormHelper
     # Automatically makes the form method :get if a Searchlogic::Search and sets
     # the params scope to :search
-    def form_for(*args, &block)
+    def form_for_with_searchlogic(*args, &block)
       if search_obj = args.find { |arg| arg.is_a?(Searchlogic::Search) }
         options = args.extract_options!
         options[:html] ||= {}
@@ -61,19 +63,17 @@ module Searchlogic
         args.unshift(:search) if args.first == search_obj
         args << options
       end
-      super
+      form_for_without_searchlogic(*args, &block)
     end
 
     # Automatically adds an "order" hidden field in your form to preserve how the data
     # is being ordered.
-    def fields_for(*args, &block)
+    def fields_for_with_searchlogic(*args, &block)
       if search_obj = args.find { |arg| arg.is_a?(Searchlogic::Search) }
         args.unshift(:search) if args.first == search_obj
         concat(content_tag("div", hidden_field_tag("#{args.first}[order]", search_obj.order)))
-        super
-      else
-        super
       end
+      fields_for_without_searchlogic(*args, &block)
     end
   end
 end

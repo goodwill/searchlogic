@@ -41,7 +41,16 @@ if !ActiveRecord::Base.respond_to?(:search)
   ActiveRecord::Base.class_eval { class << self; alias_method :search, :searchlogic; end }
 end
 
-if defined?(ActionController)
-  require "searchlogic/rails_helpers"
-  ActionController::Base.helper(Searchlogic::RailsHelpers)
+if defined?(Rails) 
+  Rails.configuration.after_initialize do
+    require "searchlogic/rails_helpers"
+    ActionController::Base.helper(Searchlogic::RailsHelpers)
+  
+    ActionView::Helpers::FormHelper.module_eval do 
+      include Searchlogic::FormHelper
+    
+      alias_method_chain :form_for, :searchlogic
+      alias_method_chain :fields_for, :searchlogic
+    end
+  end
 end
